@@ -1,6 +1,7 @@
 use std::sync::Arc;
+use std::f64::consts;
 
-use crate::{hittable::{HitRecord, Hittable}, material::Material};
+use crate::{aabb::AABB, hittable::{HitRecord, Hittable}, material::Material, vec3::Vec3};
 use crate::ray::Ray;
 use crate::vec3::Point3;
 
@@ -8,6 +9,16 @@ pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
     pub material: Arc<dyn Material>,
+}
+
+impl Sphere {
+    pub fn get_sphere_uv(p: &Point3, u: &mut f64, v: &mut f64) {
+        let theta = (-p.y).acos();
+        let phi = -p.z.atan2(p.x) + consts::PI;
+
+        *u = phi / (2.0 * consts::PI);
+        *v = theta / consts::PI;
+    }
 }
 
 impl Hittable for Sphere {
@@ -34,9 +45,18 @@ impl Hittable for Sphere {
         hit_record.t = root;
         hit_record.p = ray.at(hit_record.t);
         let outward_normal = (&hit_record.p - &self.center) / self.radius;
-        hit_record.set_face_normal(ray, outward_normal);
+        hit_record.set_face_normal(ray, &outward_normal);
+        Self::get_sphere_uv(&outward_normal, &mut hit_record.u, &mut hit_record.v);
         hit_record.material = Some(self.material.clone());
 
+        true
+    }
+
+    fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {
+        *output_box = AABB {
+            minimum: &self.center - Vec3 { x: self.radius, y: self.radius, z: self.radius },
+            maximum: &self.center + Vec3 { x: self.radius, y: self.radius, z: self.radius },
+        };
         true
     }
 }

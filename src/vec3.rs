@@ -3,7 +3,7 @@ use std::fmt;
 
 pub type Point3 = Vec3;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -24,6 +24,15 @@ impl Vec3 {
             0 => Some(&self.x),
             1 => Some(&self.y),
             2 => Some(&self.z),
+            _ => None,
+        }
+    }
+
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut f64> {
+        match index {
+            0 => Some(&mut self.x),
+            1 => Some(&mut self.y),
+            2 => Some(&mut self.z),
             _ => None,
         }
     }
@@ -118,6 +127,37 @@ impl Vec3 {
 impl fmt::Display for Vec3 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} {} {}", self.x, self.y, self.z)
+    }
+}
+
+impl<'a> IntoIterator for &'a Vec3 {
+    type Item = f64;
+    type IntoIter = Vec3Iterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Vec3Iterator {
+            vec3: self,
+            index: 0,
+        }
+    }
+}
+
+pub struct Vec3Iterator<'a> {
+    vec3: &'a Vec3,
+    index: usize,
+}
+
+impl<'a> Iterator for Vec3Iterator<'a> {
+    type Item = f64;
+    fn next(&mut self) -> Option<f64> {
+        let result = match self.index {
+            0 => self.vec3.x,
+            1 => self.vec3.y,
+            2 => self.vec3.z,
+            _ => return None,
+        };
+        self.index += 1;
+        Some(result)
     }
 }
 

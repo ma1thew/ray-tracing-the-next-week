@@ -1,4 +1,4 @@
-use std::io::{Error, Write};
+use std::io::Write;
 
 use crate::color::Color;
 
@@ -42,7 +42,7 @@ impl Image {
     }
 
     pub fn write(&self, output: &mut impl Write) {
-        println!("P3\n{} {}\n255", self.width, self.height);
+        output.write_fmt(format_args!("P3\n{} {}\n255\n", self.width, self.height)).unwrap();
         for y in (0..self.height).rev() {
             for x in 0..self.width {
                 let pixel = self.data.get((y * self.width) + x).unwrap();

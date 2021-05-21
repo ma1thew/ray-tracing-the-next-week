@@ -1,17 +1,31 @@
-use crate::{hittable::HitRecord, vec3::Vec3};
+use std::sync::Arc;
+
+use crate::{hittable::HitRecord, texture::Texture, vec3::{Point3, Vec3}};
 use crate::color::Color;
+use crate::texture::SolidColor;
 use crate::ray::Ray;
 
 pub trait Material: Send + Sync {
+    fn emitted(&self, u: f64, v: f64, point: &Point3) -> Color {
+        Color { x: 0.0, y: 0.0, z: 0.0 }    
+    }
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool;
 }
 
 pub struct Lambertian {
-    pub albedo: Color,
+    pub albedo: Arc<dyn Texture>,
+}
+
+impl Lambertian {
+    pub fn from_color(color: &Color) -> Self {
+        Self {
+            albedo: Arc::new(SolidColor { color_value: color.clone() }),
+        }
+    }
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ : &Ray, hit_record: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
+    fn scatter(&self, ray_in : &Ray, hit_record: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
         let mut scatter_direction = &hit_record.normal + Vec3::random_unit_vector();
 
         // Catch zero-vector scatter directions that will generate issues later
@@ -19,8 +33,8 @@ impl Material for Lambertian {
             scatter_direction = hit_record.normal.clone();
         }
 
-        *scattered = Ray { origin: hit_record.p.clone(), direction: scatter_direction };
-        *attenuation = self.albedo.clone();
+        *scattered = Ray { origin: hit_record.p.clone(), direction: scatter_direction, time: ray_in.time };
+        *attenuation = self.albedo.value(hit_record.u, hit_record.v, &hit_record.p);
         true
     }
 }
@@ -33,7 +47,7 @@ pub struct Metal {
 impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
         let reflected = ray_in.direction.unit_vector().reflect(&hit_record.normal);
-        *scattered = Ray { origin: hit_record.p.clone(), direction: reflected + self.fuzz * Vec3::random_in_unit_sphere() };
+        *scattered = Ray { origin: hit_record.p.clone(), direction: reflected + self.fuzz * Vec3::random_in_unit_sphere(), time: ray_in.time };
         *attenuation = self.albedo.clone();
         scattered.direction.dot(&hit_record.normal) > 0.0
     }
@@ -69,7 +83,55 @@ impl Material for Dielectric {
             direction = unit_direction.refract(&hit_record.normal, refraction_ratio)
         }
 
-        *scattered = Ray { origin: hit_record.p.clone(), direction };
+        *scattered = Ray { origin: hit_record.p.clone(), direction, time: ray_in.time };
+        true
+    }
+}
+
+pub struct DiffuseLight {
+    emit: Arc<dyn Texture>,
+}
+
+impl DiffuseLight {
+    pub fn from_color(color: Color) -> Self {
+        Self {
+            emit: Arc::new(SolidColor::from_color(color)),
+        }
+    }
+}
+
+impl Material for DiffuseLight {
+    fn scatter(&self, _: &Ray, _: &HitRecord, _: &mut Color, _: &mut Ray) -> bool {
+        false
+    }
+
+    fn emitted(&self, u: f64, v: f64, point: &Point3) -> Color {
+        self.emit.value(u, v, point)
+    }
+}
+
+pub struct Isotropic {
+    albedo: Arc<dyn Texture>,
+}
+
+impl Isotropic {
+    pub fn from_color(color: Color) -> Self {
+        Self {
+            albedo: Arc::new(SolidColor::from_color(color)),
+        }
+    }
+
+    pub fn from_texture(texture: Arc<dyn Texture>) -> Self {
+        Self {
+            albedo: texture,
+        }
+    }
+}
+
+impl Material for Isotropic {
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
+        *scattered = Ray { origin: hit_record.p.clone(), direction: Vec3::random_in_unit_sphere(), time: ray_in.time };
+        *attenuation = self.albedo.value(hit_record.u, hit_record.v, &hit_record.p);
         true
     }
 }
