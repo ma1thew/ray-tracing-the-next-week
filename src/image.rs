@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use crate::color::Color;
+use crate::vec3::Color;
 
 pub struct Image {
     width: usize,

@@ -32,7 +32,7 @@ impl Hittable for YZRect {
         true
     }
 
-    fn bounding_box(&self, time_start: f64, time_end: f64, output_box: &mut AABB) -> bool {
+    fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {
         *output_box = AABB { minimum: Point3 { x: self.k - 0.0001, y: self.y0, z: self.z0 }, maximum: Point3 { x: self.k + 0.0001, y: self.y1, z: self.z1 } };
         true
     }

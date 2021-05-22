@@ -2,6 +2,7 @@ use auto_ops::{impl_op_ex, impl_op_ex_commutative};
 use std::fmt;
 
 pub type Point3 = Vec3;
+pub type Color = Vec3;
 
 #[derive(Clone, Default)]
 pub struct Vec3 {

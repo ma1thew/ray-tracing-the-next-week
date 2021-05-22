@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{color::Color, vec3::Point3, perlin::Perlin};
+use crate::{vec3::Color, vec3::Point3, perlin::Perlin};
 
 pub trait Texture: Send + Sync {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color;
@@ -64,7 +64,7 @@ impl NoiseTexture {
 }
 
 impl Texture for NoiseTexture {
-    fn value(&self, u: f64, v: f64, p: &Point3) -> Color {
+    fn value(&self, _: f64, _: f64, p: &Point3) -> Color {
         Color { x: 1.0, y: 1.0, z: 1.0 } * 0.5 * (1.0 + (self.scale * p.z + 10.0 * self.noise.turb(p, 7)).sin())
     }
 }
@@ -109,7 +109,7 @@ impl ImageTexture {
 }
 
 impl Texture for ImageTexture {
-    fn value(&self, u: f64, v: f64, p: &Point3) -> Color {
+    fn value(&self, u: f64, v: f64, _: &Point3) -> Color {
         let u = u.clamp(0.0, 1.0);
         // This is a deviation from the book, where v gets flipped.
         // This is probably because the BMP loader loads in stuff upside down.

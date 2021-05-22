@@ -1,5 +1,4 @@
 mod camera;
-mod color;
 mod hittable;
 mod hittable_list;
 mod material;
@@ -24,7 +23,6 @@ mod constant_medium;
 use std::{sync::{Arc, mpsc::{self, Sender}}, thread};
 
 use camera::Camera;
-use color::Color;
 use constant_medium::ConstantMedium;
 use hittable::{HitRecord, Hittable};
 use hittable_box::HittableBox;
@@ -36,7 +34,7 @@ use rotate_y::RotateY;
 use sphere::Sphere;
 use moving_sphere::MovingSphere;
 use translate::Translate;
-use vec3::{Point3, Vec3};
+use vec3::{Point3, Vec3, Color};
 use bvh_node::BVHNode;
 use texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
 use xy_rect::XYRect;
@@ -130,9 +128,9 @@ fn simple_light() -> HittableList {
 
 fn cornell_box() -> HittableList {
     let mut objects = HittableList::new();
-    let red = Arc::new(Lambertian::from_color(&Color { x: 0.65, y: 0.05, z: 0.05 }));
-    let white = Arc::new(Lambertian::from_color(&Color { x: 0.73, y: 0.73, z: 0.73 }));
-    let green = Arc::new(Lambertian::from_color(&Color { x: 0.12, y: 0.45, z: 0.15 }));
+    let red = Arc::new(Lambertian::from_color(Color { x: 0.65, y: 0.05, z: 0.05 }));
+    let white = Arc::new(Lambertian::from_color(Color { x: 0.73, y: 0.73, z: 0.73 }));
+    let green = Arc::new(Lambertian::from_color(Color { x: 0.12, y: 0.45, z: 0.15 }));
     let light = Arc::new(DiffuseLight::from_color(Color { x: 15.0, y: 15.0, z: 15.0 }));
 
     objects.add(Arc::new(YZRect { material: green, y0: 0.0, y1: 555.0, z0: 0.0, z1: 555.0, k: 555.0 }));
@@ -158,9 +156,9 @@ fn cornell_box() -> HittableList {
 
 fn cornell_smoke() -> HittableList {
     let mut objects = HittableList::new();
-    let red = Arc::new(Lambertian::from_color(&Color { x: 0.65, y: 0.05, z: 0.05 }));
-    let white = Arc::new(Lambertian::from_color(&Color { x: 0.73, y: 0.73, z: 0.73 }));
-    let green = Arc::new(Lambertian::from_color(&Color { x: 0.12, y: 0.45, z: 0.15 }));
+    let red = Arc::new(Lambertian::from_color(Color { x: 0.65, y: 0.05, z: 0.05 }));
+    let white = Arc::new(Lambertian::from_color(Color { x: 0.73, y: 0.73, z: 0.73 }));
+    let green = Arc::new(Lambertian::from_color(Color { x: 0.12, y: 0.45, z: 0.15 }));
     let light = Arc::new(DiffuseLight::from_color(Color { x: 7.0, y: 7.0, z: 7.0 }));
 
     objects.add(Arc::new(YZRect { material: green, y0: 0.0, y1: 555.0, z0: 0.0, z1: 555.0, k: 555.0 }));
@@ -187,7 +185,7 @@ fn cornell_smoke() -> HittableList {
 
 fn final_scene() -> HittableList {
     let mut boxes_1 = HittableList::new();
-    let ground = Arc::new(Lambertian::from_color(&Color { x: 0.48, y: 0.83, z: 0.53 }));
+    let ground = Arc::new(Lambertian::from_color(Color { x: 0.48, y: 0.83, z: 0.53 }));
 
     const BOXES_PER_SIDE: usize = 20;
     for i in 0..BOXES_PER_SIDE {
@@ -212,7 +210,7 @@ fn final_scene() -> HittableList {
     let center_1 = Point3 { x: 400.0, y: 400.0, z: 200.0 };
     let center_2 = &center_1 + Vec3 { x: 30.0, y: 0.0, z: 0.0 };
 
-    let moving_sphere_material = Arc::new(Lambertian::from_color(&Color { x: 0.7, y: 0.3, z: 0.1 }));
+    let moving_sphere_material = Arc::new(Lambertian::from_color(Color { x: 0.7, y: 0.3, z: 0.1 }));
     objects.add(Arc::new(MovingSphere { center_start: center_1, center_end: center_2, time_start: 0.0, time_end: 1.0, radius: 50.0, material: moving_sphere_material }));
 
     objects.add(Arc::new(Sphere { center: Point3 { x: 260.0, y: 150.0, z: 45.0 }, radius: 50.0, material: Arc::new(Dielectric { index_of_refraction: 1.5 }) }));
@@ -230,7 +228,7 @@ fn final_scene() -> HittableList {
     objects.add(Arc::new(Sphere { center: Point3 { x: 220.0, y: 280.0, z: 300.0 }, radius: 80.0, material: pertext }));
 
     let mut boxes_2 = HittableList::new();
-    let white = Arc::new(Lambertian::from_color(&Color { x: 0.73, y: 0.73, z: 0.73 }));
+    let white = Arc::new(Lambertian::from_color(Color { x: 0.73, y: 0.73, z: 0.73 }));
     for _ in 0..1000 {
         boxes_2.add(Arc::new(Sphere { center: Point3::random_in_range(0.0, 165.0), radius: 10.0, material: white.clone() }));
     }
@@ -283,74 +281,84 @@ fn render(image_width: u32, image_height: u32, samples_per_pixel: u32, max_depth
 
 fn main() {
     // Image
-    //const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const ASPECT_RATIO: f64 = 1.0;
+    const ASPECT_RATIO: f64 = 16.0 / 9.0;
+    //const ASPECT_RATIO: f64 = 1.0;
     const IMAGE_WIDTH: u32 = 800;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 10000;
+    const SAMPLES_PER_PIXEL: u32 = 1000;
     const MAX_DEPTH: u32 = 50;
     const THREAD_COUNT: u32 = 8; // TODO: fix multithreading bug
     const TIME_START: f64 = 0.0;
     const TIME_END: f64 = 1.0;
     // World
-    //let world = Arc::new(random_scene());
-    // Scene 1 - random_scene
-    /*let world = Arc::new(BVHNode::new(&random_scene(), TIME_START, TIME_END));
-    let lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
-    let lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
-    let vfov = 20.0;
-    let aperture = 0.1;*/
-    //let background = Color { x: 0.7, y: 0.8, z: 1.0 };
-    // Scene 2 - two_spheres
-    /*let world = Arc::new(BVHNode::new(&two_spheres(), TIME_START, TIME_END));
-    let lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
-    let lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
-    let vfov = 20.0;
-    let aperture = 0.0;*/
-    //let background = Color { x: 0.7, y: 0.8, z: 1.0 };
-    // Scene 3 - two_perlin_spheres
-    /*let world = Arc::new(BVHNode::new(&two_perlin_spheres(), TIME_START, TIME_END));
-    let lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
-    let lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
-    let vfov = 20.0;
-    let aperture = 0.0;*/
-    //let background = Color { x: 0.7, y: 0.8, z: 1.0 };
-    // Scene 4 - earth
-    /*let world = Arc::new(BVHNode::new(&earth(), TIME_START, TIME_END));
-    let lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
-    let lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
-    let vfov = 20.0;
-    let aperture = 0.0;*/
-    //let background = Color { x: 0.7, y: 0.8, z: 1.0 };
-    // Scene 5 - simple_light
-    /*let world = Arc::new(BVHNode::new(&simple_light(), TIME_START, TIME_END));
-    let lookfrom = Point3 { x: 26.0, y: 3.0, z: 6.0 };
-    let lookat = Point3 { x: 0.0, y: 2.0, z: 0.0 };
-    let vfov = 20.0;
-    let aperture = 0.0;
-    let background = Color { x: 0.0, y: 0.0, z: 0.0 };*/
-    // Scene 6 - cornell_box
-    /*let world = Arc::new(BVHNode::new(&cornell_box(), TIME_START, TIME_END));
-    let lookfrom = Point3 { x: 278.0, y: 278.0, z: -800.0 };
-    let lookat = Point3 { x: 278.0, y: 278.0, z: 0.0 };
-    let vfov = 40.0;
-    let aperture = 0.0;
-    let background = Color { x: 0.0, y: 0.0, z: 0.0 };*/
-    // Scene 7 - cornell_smoke
-    /*let world = Arc::new(BVHNode::new(&cornell_smoke(), TIME_START, TIME_END));
-    let lookfrom = Point3 { x: 278.0, y: 278.0, z: -800.0 };
-    let lookat = Point3 { x: 278.0, y: 278.0, z: 0.0 };
-    let vfov = 40.0;
-    let aperture = 0.0;
-    let background = Color { x: 0.0, y: 0.0, z: 0.0 };*/
-    // Scene 8 - final
-    let world = Arc::new(final_scene());
-    let lookfrom = Point3 { x: 478.0, y: 278.0, z: -600.0 };
-    let lookat = Point3 { x: 278.0, y: 278.0, z: 0.0 };
-    let vfov = 40.0;
-    let aperture = 0.0;
-    let background = Color { x: 0.0, y: 0.0, z: 0.0 };
+    let mut world: Arc<dyn Hittable> = Arc::new(BVHNode::new(&random_scene(), TIME_START, TIME_END));
+    let mut lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
+    let mut lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
+    let mut vfov = 20.0;
+    let mut aperture = 0.1;
+    let mut background = Color { x: 0.7, y: 0.8, z: 1.0 };
 
+    match std::env::args().nth(1) { 
+        Some(string) => { 
+            match string.trim().parse::<u32>() {
+            Ok(2) => {
+                world = Arc::new(BVHNode::new(&two_spheres(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
+                lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
+                vfov = 20.0;
+                aperture = 0.0;
+                background = Color { x: 0.7, y: 0.8, z: 1.0 };
+            },
+            Ok(3) => {
+                world = Arc::new(BVHNode::new(&two_perlin_spheres(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
+                lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
+                vfov = 20.0;
+                aperture = 0.0;
+            },
+            Ok(4) => {
+                world = Arc::new(BVHNode::new(&earth(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
+                lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
+                vfov = 20.0;
+                aperture = 0.0;
+            },
+            Ok(5) => {
+                world = Arc::new(BVHNode::new(&simple_light(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 26.0, y: 3.0, z: 6.0 };
+                lookat = Point3 { x: 0.0, y: 2.0, z: 0.0 };
+                vfov = 20.0;
+                aperture = 0.0;
+                background = Color { x: 0.0, y: 0.0, z: 0.0 };
+            },
+            Ok(6) => {
+                world = Arc::new(BVHNode::new(&cornell_box(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 278.0, y: 278.0, z: -800.0 };
+                lookat = Point3 { x: 278.0, y: 278.0, z: 0.0 };
+                vfov = 40.0;
+                aperture = 0.0;
+                background = Color { x: 0.0, y: 0.0, z: 0.0 };
+            },
+            Ok(7) => {
+                world = Arc::new(BVHNode::new(&cornell_smoke(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 278.0, y: 278.0, z: -800.0 };
+                lookat = Point3 { x: 278.0, y: 278.0, z: 0.0 };
+                vfov = 40.0;
+                aperture = 0.0;
+                background = Color { x: 0.0, y: 0.0, z: 0.0 };
+            },
+            Ok(8) => {
+                world = Arc::new(final_scene());
+                lookfrom = Point3 { x: 478.0, y: 278.0, z: -600.0 };
+                lookat = Point3 { x: 278.0, y: 278.0, z: 0.0 };
+                vfov = 40.0;
+                aperture = 0.0;
+                background = Color { x: 0.0, y: 0.0, z: 0.0 };
+            }
+            _ => {},
+        }},
+        _ => {},
+    }
     // Camera
     let vup = Vec3 { x: 0.0, y: 1.0, z: 0.0 };
     let dist_to_focus = 10.0;

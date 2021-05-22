@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use crate::{hittable::HitRecord, texture::Texture, vec3::{Point3, Vec3}};
-use crate::color::Color;
+use crate::vec3::Color;
 use crate::texture::SolidColor;
 use crate::ray::Ray;
 
 pub trait Material: Send + Sync {
-    fn emitted(&self, u: f64, v: f64, point: &Point3) -> Color {
+    fn emitted(&self, _: f64, _: f64, _: &Point3) -> Color {
         Color { x: 0.0, y: 0.0, z: 0.0 }    
     }
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool;
@@ -17,7 +17,7 @@ pub struct Lambertian {
 }
 
 impl Lambertian {
-    pub fn from_color(color: &Color) -> Self {
+    pub fn from_color(color: Color) -> Self {
         Self {
             albedo: Arc::new(SolidColor { color_value: color.clone() }),
         }
@@ -41,7 +41,7 @@ impl Material for Lambertian {
 
 pub struct Metal {
     pub albedo: Color,
-    pub fuzz: f64, // This should have value 0.0 - 1.0; this is not enforced
+    pub fuzz: f64, // TODO: This should have value 0.0 - 1.0; this is not enforced
 }
 
 impl Material for Metal {
