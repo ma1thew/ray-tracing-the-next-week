@@ -7,7 +7,6 @@ mod sphere;
 mod util;
 mod vec3;
 mod image;
-mod moving_sphere;
 mod aabb;
 mod bvh_node;
 mod texture;
@@ -33,7 +32,6 @@ use material::{Dielectric, DiffuseLight, Lambertian, Material, Metal};
 use ray::Ray;
 use rotate_y::RotateY;
 use sphere::Sphere;
-use moving_sphere::MovingSphere;
 use translate::Translate;
 use vec3::{Point3, Vec3, Color};
 use bvh_node::BVHNode;
@@ -68,8 +66,7 @@ fn random_scene() -> HittableList {
                 if choose_mat < 0.8 {
                     let albedo = Arc::new(SolidColor::from_color(Color::random() * Color::random()));
                     sphere_material = Arc::new(Lambertian { albedo });
-                    let center_end = &center + Vec3 { x: 0.0, y: rand::random::<f64>() / 2.0, z: 0.0 };
-                    world.add(Arc::new(MovingSphere { center_start: center, center_end, time_start: 0.0, time_end: 1.0, radius: 0.2, material: sphere_material }));
+                    world.add(Arc::new(Sphere { center, radius: 0.2, material: sphere_material }));
                 } else if choose_mat < 0.95 {
                     let albedo = Color::random_in_range(0.5, 1.0);
                     let fuzz = rand::random::<f64>() / 2.0;
@@ -214,7 +211,7 @@ fn final_scene() -> HittableList {
     let center_2 = &center_1 + Vec3 { x: 30.0, y: 0.0, z: 0.0 };
 
     let moving_sphere_material = Arc::new(Lambertian::from_color(Color { x: 0.7, y: 0.3, z: 0.1 }));
-    objects.add(Arc::new(MovingSphere { center_start: center_1, center_end: center_2, time_start: 0.0, time_end: 1.0, radius: 50.0, material: moving_sphere_material }));
+    objects.add(Arc::new(Moving { hittable: Arc::new(Sphere { center: Point3::new(), radius: 50.0, material: moving_sphere_material }), offset_start: center_1, offset_end: center_2, time_start: 0.0, time_end: 1.0, }));
 
     objects.add(Arc::new(Sphere { center: Point3 { x: 260.0, y: 150.0, z: 45.0 }, radius: 50.0, material: Arc::new(Dielectric { index_of_refraction: 1.5 }) }));
     objects.add(Arc::new(Sphere { center: Point3 { x: 0.0, y: 150.0, z: 145.0 }, radius: 50.0, material: Arc::new(Metal { albedo: Color { x: 0.8, y: 0.8, z: 0.9 }, fuzz: 1.0 }) }));
@@ -298,7 +295,7 @@ fn main() {
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
     const SAMPLES_PER_PIXEL: u32 = 200;
     const MAX_DEPTH: u32 = 50;
-    const THREAD_COUNT: u32 = 1; // TODO: fix multithreading bug
+    const THREAD_COUNT: u32 = 8; // TODO: fix multithreading bug
     const TIME_START: f64 = 0.0;
     const TIME_END: f64 = 1.0;
     // World
