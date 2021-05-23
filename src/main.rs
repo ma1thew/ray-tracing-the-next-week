@@ -19,6 +19,7 @@ mod hittable_box;
 mod translate;
 mod rotate_y;
 mod constant_medium;
+mod moving;
 
 use std::{sync::{Arc, mpsc::{self, Sender}}, thread};
 
@@ -40,6 +41,8 @@ use texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
 use xy_rect::XYRect;
 use xz_rect::XZRect;
 use yz_rect::YZRect;
+
+use crate::moving::Moving;
 
 struct PixelUpdate {
     color: Color,
@@ -237,6 +240,14 @@ fn final_scene() -> HittableList {
     objects
 }
 
+fn test_scene() -> HittableList {
+    let mut objects = HittableList::new();
+    let earth_texture = Arc::new(ImageTexture::from_bmp_data(&include_bytes!("../res/earthmap.bmp").to_vec()));
+    let earth_surface = Arc::new(Lambertian { albedo: earth_texture });
+    objects.add(Arc::new(Moving { hittable: Arc::new(HittableBox::new(Point3 { x: 0.0, y: 0.0, z: 0.0 }, Point3 { x: 1.0, y: 1.0, z: 1.0 }, earth_surface) ), offset_start: Vec3::new(), offset_end: Vec3 { x: 0.0, y: 1.0, z: 0.0 }, time_start: 0.0, time_end: 1.0 }));
+    objects
+}
+
 fn ray_color(ray: &Ray, background: &Color, world: &dyn Hittable, depth: u32) -> Color {
     let mut rec = HitRecord::new();
     if depth <= 0 {
@@ -283,11 +294,11 @@ fn main() {
     // Image
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     //const ASPECT_RATIO: f64 = 1.0;
-    const IMAGE_WIDTH: u32 = 800;
+    const IMAGE_WIDTH: u32 = 600;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 1000;
+    const SAMPLES_PER_PIXEL: u32 = 200;
     const MAX_DEPTH: u32 = 50;
-    const THREAD_COUNT: u32 = 8; // TODO: fix multithreading bug
+    const THREAD_COUNT: u32 = 1; // TODO: fix multithreading bug
     const TIME_START: f64 = 0.0;
     const TIME_END: f64 = 1.0;
     // World
@@ -354,7 +365,14 @@ fn main() {
                 vfov = 40.0;
                 aperture = 0.0;
                 background = Color { x: 0.0, y: 0.0, z: 0.0 };
-            }
+            },
+            Ok(9) => {
+                world = Arc::new(BVHNode::new(&test_scene(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
+                lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
+                vfov = 20.0;
+                aperture = 0.0;
+            },
             _ => {},
         }},
         _ => {},
