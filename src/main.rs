@@ -295,7 +295,7 @@ fn main() {
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
     const SAMPLES_PER_PIXEL: u32 = 200;
     const MAX_DEPTH: u32 = 50;
-    const THREAD_COUNT: u32 = 8; // TODO: fix multithreading bug
+    const THREAD_COUNT: u32 = 8;
     const TIME_START: f64 = 0.0;
     const TIME_END: f64 = 1.0;
     // World
@@ -391,9 +391,13 @@ fn main() {
             render(IMAGE_WIDTH, IMAGE_HEIGHT, SAMPLES_PER_PIXEL / THREAD_COUNT, MAX_DEPTH, world_ref, background_clone, camera_ref, sender);
         }));
     }
-    while Arc::strong_count(&world) > 1 {
+    loop {
         if let Ok(update) = rx.try_recv() {
             final_image.add_sample(update.x, update.y, update.color);
+        } else {
+            if Arc::strong_count(&world) == 1 {
+                break
+            }
         }
     }
     final_image.write(&mut std::io::stdout());
