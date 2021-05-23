@@ -274,7 +274,6 @@ fn ray_color(ray: &Ray, background: &Color, world: &dyn Hittable, depth: u32) ->
 
 fn render(image_width: u32, image_height: u32, samples_per_pixel: u32, max_depth: u32, world: Arc<dyn Hittable>, background: Color, camera: Arc<Camera>, tx: Sender<PixelUpdate>) {
     for j in (0..image_height).rev() {
-        eprintln!("\rScanlines remaining: {}", j);
         for i in 0..image_width {
             for _ in 0..samples_per_pixel {
                 let u = ((i as f64) + rand::random::<f64>()) / ((image_width - 1) as f64);
@@ -291,9 +290,9 @@ fn main() {
     // Image
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     //const ASPECT_RATIO: f64 = 1.0;
-    const IMAGE_WIDTH: u32 = 600;
+    const IMAGE_WIDTH: u32 = 800;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 200;
+    const SAMPLES_PER_PIXEL: u32 = 1000;
     const MAX_DEPTH: u32 = 50;
     const THREAD_COUNT: u32 = 8;
     const TIME_START: f64 = 0.0;
@@ -380,20 +379,26 @@ fn main() {
     let cam = Arc::new(Camera::new(lookfrom, lookat, vup, vfov, ASPECT_RATIO, aperture, dist_to_focus, TIME_START, TIME_END));
     // Render
     let mut final_image = Image::new(IMAGE_WIDTH as usize, IMAGE_HEIGHT as usize);
-    let mut thread_pool = Vec::with_capacity(THREAD_COUNT as usize);
     let (tx, rx) = mpsc::channel::<PixelUpdate>();
     for _ in 0..THREAD_COUNT {
         let sender = tx.clone();
         let world_ref = world.clone();
         let camera_ref = cam.clone();
         let background_clone = background.clone();
-        thread_pool.push(thread::spawn( || {
+        thread::spawn( || {
             render(IMAGE_WIDTH, IMAGE_HEIGHT, SAMPLES_PER_PIXEL / THREAD_COUNT, MAX_DEPTH, world_ref, background_clone, camera_ref, sender);
-        }));
+        });
     }
+    let expected_updates: u64 = (SAMPLES_PER_PIXEL / THREAD_COUNT) as u64 * THREAD_COUNT as u64 * IMAGE_HEIGHT as u64 * IMAGE_WIDTH as u64;
+    let print_frequency: u64 = (SAMPLES_PER_PIXEL / THREAD_COUNT) as u64 * THREAD_COUNT as u64 * IMAGE_WIDTH as u64;
+    let mut update_count: u64 = 0;
     loop {
         if let Ok(update) = rx.try_recv() {
+            update_count += 1;
             final_image.add_sample(update.x, update.y, update.color);
+            if update_count % print_frequency == 0 {
+                eprintln!("Current completion: {:.2}%", (update_count as f64 / expected_updates as f64) * 100.0)
+            }
         } else {
             if Arc::strong_count(&world) == 1 {
                 break
