@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::{HitRecord, Hittable}, hittable_list::HittableList, material::Material, ray::Ray, vec3::Point3, xy_rect::XYRect, xz_rect::XZRect, yz_rect::YZRect};
+use crate::{hittable::{HitRecord, Hittable, AABB, hittable_list::HittableList, xy_rect::XYRect, xz_rect::XZRect, yz_rect::YZRect}, material::Material, ray::Ray, vec3::Point3};
 
 pub struct HittableBox {
     min: Point3,

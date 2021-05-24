@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::{HitRecord, Hittable}};
+use crate::hittable::{HitRecord, Hittable, AABB};
 use crate::ray::Ray;
 
 pub struct HittableList {

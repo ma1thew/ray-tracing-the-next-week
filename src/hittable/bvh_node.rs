@@ -2,7 +2,7 @@ use std::{cmp, sync::Arc};
 
 use rand::seq::SliceRandom;
 
-use crate::{aabb::AABB, hittable::{HitRecord, Hittable}, hittable_list::HittableList};
+use crate::hittable::{HitRecord, Hittable, AABB, hittable_list::HittableList};
 use crate::ray::Ray;
 
 pub struct BVHNode {

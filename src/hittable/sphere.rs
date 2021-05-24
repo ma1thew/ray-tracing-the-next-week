@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::f64::consts;
 
-use crate::{aabb::AABB, hittable::{HitRecord, Hittable}, material::Material, vec3::Vec3};
+use crate::{hittable::{HitRecord, Hittable, AABB}, material::Material, vec3::Vec3};
 use crate::ray::Ray;
 use crate::vec3::Point3;
 

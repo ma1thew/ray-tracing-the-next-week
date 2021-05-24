@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::{HitRecord, Hittable}, ray::Ray, vec3::Vec3};
+use crate::{hittable::{HitRecord, Hittable, AABB}, ray::Ray, vec3::Vec3};
 
 pub struct Translate {
     pub hittable: Arc<dyn Hittable>,

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::{HitRecord, Hittable}, material::{Isotropic, Material}, ray::Ray, texture::Texture, vec3::Vec3};
+use crate::{hittable::{HitRecord, Hittable, AABB}, material::{Isotropic, Material}, ray::Ray, texture::Texture, vec3::Vec3};
 
 pub struct ConstantMedium {
     boundary: Arc<dyn Hittable>,

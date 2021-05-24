@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{aabb::AABB, hittable::{HitRecord, Hittable}, ray::Ray, util::degrees_to_radians, vec3::{Point3, Vec3}};
+use crate::{hittable::{HitRecord, Hittable, AABB}, ray::Ray, util::degrees_to_radians, vec3::{Point3, Vec3}};
 
 pub struct RotateY {
     hittable: Arc<dyn Hittable>,

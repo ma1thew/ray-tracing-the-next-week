@@ -1,9 +1,28 @@
+pub mod instance;
+mod bvh_node;
+pub use bvh_node::BVHNode;
+mod constant_medium;
+pub use constant_medium::ConstantMedium;
+mod hittable_box;
+pub use hittable_box::HittableBox;
+mod hittable_list;
+pub use hittable_list::HittableList;
+mod xy_rect;
+pub use xy_rect::XYRect;
+mod xz_rect;
+pub use xz_rect::XZRect;
+mod yz_rect;
+pub use yz_rect::YZRect;
+mod sphere;
+pub use sphere::Sphere;
+mod aabb;
+
 use std::sync::Arc;
 
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 use crate::material::Material;
-use crate::aabb::AABB;
+use aabb::AABB;
 
 #[derive(Clone)]
 pub struct HitRecord {
