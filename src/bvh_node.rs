@@ -46,11 +46,8 @@ impl BVHNode {
 
             }
         };
-        let mut box_left = AABB::new();
-        let mut box_right = AABB::new();
-        if !left.bounding_box(time_start, time_end, &mut box_left) || !right.bounding_box(time_start, time_end, &mut box_right) {
-            panic!("No bounding box in bvh_node constructor!")
-        }
+        let box_left = left.bounding_box(time_start, time_end).expect("No bounding box in bvh_node constructor!");
+        let box_right = right.bounding_box(time_start, time_end).expect("No bounding box in bvh_node constructor!");
 
         BVHNode {
             left,
@@ -60,12 +57,9 @@ impl BVHNode {
     }
 
     fn box_compare (a: Arc<dyn Hittable>, b: Arc<dyn Hittable>, axis: Axis) -> cmp::Ordering {
-        let mut box_a = AABB::new();
-        let mut box_b = AABB::new();
+        let box_a = a.bounding_box(0.0, 0.0).expect("No bounding box in bvh_node constructor!");
+        let box_b = b.bounding_box(0.0, 0.0).expect("No bounding box in bvh_node constructor!");
 
-        if !a.bounding_box(0.0, 0.0, &mut box_a) || !b.bounding_box(0.0, 0.0, &mut box_b) {
-            panic!("No bounding box in bvh_node constructor!")
-        }
         // TODO: total_cmp is unstable :(
         box_a.minimum.get(axis as usize).unwrap().partial_cmp(box_b.minimum.get(axis as usize).unwrap()).unwrap()
     }
@@ -90,8 +84,7 @@ impl Hittable for BVHNode {
         }
     }
 
-    fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {
-        *output_box = self.aabb.clone();
-        true
+    fn bounding_box(&self, _: f64, _: f64) -> Option<AABB> {
+        Some(self.aabb.clone())
     }
 }

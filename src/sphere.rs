@@ -52,11 +52,10 @@ impl Hittable for Sphere {
         Some(hit_record)
     }
 
-    fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {
-        *output_box = AABB {
+    fn bounding_box(&self, _: f64, _: f64) -> Option<AABB> {
+        Some(AABB {
             minimum: &self.center - Vec3 { x: self.radius, y: self.radius, z: self.radius },
             maximum: &self.center + Vec3 { x: self.radius, y: self.radius, z: self.radius },
-        };
-        true
+        })
     }
 }

@@ -38,24 +38,22 @@ impl Hittable for HittableList {
         record
     }
 
-    fn bounding_box(&self, time_start: f64, time_end: f64, output_box: &mut AABB) -> bool {
+    fn bounding_box(&self, time_start: f64, time_end: f64) -> Option<AABB> {
         if self.objects.is_empty() {
-            return false;
+            return None;
         }
-        let mut temp_box = AABB::new();
+        let mut output_box = AABB::new();
         let mut first_box = true;
 
         for object in &self.objects {
-            if !object.bounding_box(time_start, time_end, &mut temp_box) {
-                return false;
-            }
-            *output_box = if first_box {
+            let temp_box = object.bounding_box(time_start, time_end)?;
+            output_box = if first_box {
                 temp_box.clone()
             } else {
                 output_box.surrounding_box(&temp_box)
             };
             first_box = false;
         }
-        true
+        Some(output_box)
     }
 }

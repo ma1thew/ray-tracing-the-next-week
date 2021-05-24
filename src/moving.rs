@@ -26,18 +26,14 @@ impl Hittable for Moving {
         Some(hit_record)
     }
 
-    fn bounding_box(&self, time_start: f64, time_end: f64, output_box: &mut AABB) -> bool {
-        if !self.hittable.bounding_box(time_start, time_end, output_box) {
-            return false;
-        }
-
-        *output_box = AABB {
+    fn bounding_box(&self, time_start: f64, time_end: f64) -> Option<AABB> {
+        let output_box = self.hittable.bounding_box(time_start, time_end)?;
+        Some(AABB {
             minimum: &output_box.minimum + &self.offset_at(time_start),
             maximum: &output_box.maximum + &self.offset_at(time_start),
         }.surrounding_box(&AABB {
             minimum: &output_box.minimum + &self.offset_at(time_end),
             maximum: &output_box.maximum + &self.offset_at(time_end),
-        });
-        true
+        }))
     }
 }

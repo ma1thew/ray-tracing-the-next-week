@@ -39,12 +39,10 @@ impl Hittable for YZRect {
         Some(hit_record)
     }
 
-    fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {
-        if self.has_infinite_bounds() {
-            false
-        } else {
-            *output_box = AABB { minimum: Point3 { x: self.k - 0.0001, y: self.y0, z: self.z0 }, maximum: Point3 { x: self.k + 0.0001, y: self.y1, z: self.z1 } };
-            true
+    fn bounding_box(&self, _: f64, _: f64) -> Option<AABB> {
+        match self.has_infinite_bounds() {
+            true => None,
+            false => Some(AABB { minimum: Point3 { x: self.k - 0.0001, y: self.y0, z: self.z0 }, maximum: Point3 { x: self.k + 0.0001, y: self.y1, z: self.z1 } }),
         }
     }
 }

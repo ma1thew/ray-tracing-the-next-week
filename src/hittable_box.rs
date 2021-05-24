@@ -34,8 +34,7 @@ impl Hittable for HittableBox {
         self.sides.hit(ray, t_min, t_max)
     }
 
-    fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {
-        *output_box = AABB { minimum: self.min.clone(), maximum: self.max.clone() };
-        true
+    fn bounding_box(&self, _: f64, _: f64) -> Option<AABB> {
+        Some(AABB { minimum: self.min.clone(), maximum: self.max.clone() })
     }
 }

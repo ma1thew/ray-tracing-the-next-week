@@ -399,7 +399,7 @@ fn main() {
             update_count += 1;
             final_image.add_sample(update.x, update.y, update.color);
             if update_count % print_frequency == 0 {
-                eprint!("Current completion: {:.2}%\r", (update_count as f64 / expected_updates as f64) * 100.0)
+                eprint!("\rCurrent completion: {:.2}%", (update_count as f64 / expected_updates as f64) * 100.0)
             }
         } else {
             if Arc::strong_count(&world) == 1 {
@@ -408,5 +408,5 @@ fn main() {
         }
     }
     final_image.write(&mut std::io::stdout());
-    eprintln!("Done.");
+    eprintln!("\nDone.");
 }
