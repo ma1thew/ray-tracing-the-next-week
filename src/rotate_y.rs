@@ -50,7 +50,7 @@ impl RotateY {
 }
 
 impl Hittable for RotateY {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut origin = ray.origin.clone();
         let mut direction = ray.direction.clone();
 
@@ -61,9 +61,7 @@ impl Hittable for RotateY {
         direction.z = self.sin_theta * ray.direction.x + self.cos_theta * ray.direction.z;
 
         let rotated_ray = Ray { origin, direction, time: ray.time };
-        if !self.hittable.hit(&rotated_ray, t_min, t_max, hit_record) {
-            return false;
-        }
+        let mut hit_record = self.hittable.hit(&rotated_ray, t_min, t_max)?;
 
         let mut p = hit_record.p.clone();
         let mut normal = hit_record.normal.clone();
@@ -76,7 +74,7 @@ impl Hittable for RotateY {
 
         hit_record.p = p;
         hit_record.set_face_normal(&rotated_ray, &normal);
-        true
+        Some(hit_record)
     }
 
     fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {

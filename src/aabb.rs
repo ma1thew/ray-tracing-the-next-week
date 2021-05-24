@@ -14,22 +14,6 @@ impl AABB {
             maximum: Point3::new(),
         }
     }
-    /*pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> bool {
-        let mut t_min = t_min;
-        let mut t_max = t_max;
-        for a in 0..3 {
-            let t0 = ((self.minimum.get(a).unwrap() - ray.origin.get(a).unwrap()) / ray.direction.get(a).unwrap())
-                .min((self.maximum.get(a).unwrap() - ray.origin.get(a).unwrap()) / ray.direction.get(a).unwrap());
-            let t1 = ((self.minimum.get(a).unwrap() - ray.origin.get(a).unwrap()) / ray.direction.get(a).unwrap())
-                .max((self.maximum.get(a).unwrap() - ray.origin.get(a).unwrap()) / ray.direction.get(a).unwrap());
-            t_min = t0.max(t_min);
-            t_max = t1.min(t_max);
-            if t_max <= t_min {
-                return false
-            }
-        }
-        true
-    }*/
     pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> bool {
         // TODO: This is a bit untidy.
         let mut t_min = t_min;

@@ -24,7 +24,7 @@ use std::{sync::{Arc, mpsc::{self, Sender}}, thread};
 
 use camera::Camera;
 use constant_medium::ConstantMedium;
-use hittable::{HitRecord, Hittable};
+use hittable::Hittable;
 use hittable_box::HittableBox;
 use hittable_list::HittableList;
 use image::Image;
@@ -247,7 +247,6 @@ fn test_scene() -> HittableList {
 }
 
 fn ray_color(ray: &Ray, background: &Color, world: &dyn Hittable, depth: u32) -> Color {
-    let mut rec = HitRecord::new();
     if depth <= 0 {
         return Color {
             x: 0.0,
@@ -255,21 +254,22 @@ fn ray_color(ray: &Ray, background: &Color, world: &dyn Hittable, depth: u32) ->
             z: 0.0,
         };
     }
-    if !world.hit(ray, 0.001, f64::INFINITY, &mut rec) {
-        background.clone()
-    } else {
-        let mut scattered = Ray::new();
-        let mut attenuation = Color::new();
-        if let Some(material) = &rec.material {
-            let emitted = material.emitted(rec.u, rec.v, &rec.p);
-            if !material.scatter(&ray, &rec, &mut attenuation, &mut scattered) {
-                emitted
+    match world.hit(ray, 0.001, f64::INFINITY) {
+        None => background.clone(),
+        Some(rec) => {
+            let mut scattered = Ray::new();
+            let mut attenuation = Color::new();
+            if let Some(material) = &rec.material {
+                let emitted = material.emitted(rec.u, rec.v, &rec.p);
+                if !material.scatter(&ray, &rec, &mut attenuation, &mut scattered) {
+                    emitted
+                } else {
+                    emitted + attenuation * ray_color(&scattered, background, world, depth - 1)
+                }
             } else {
-                emitted + attenuation * ray_color(&scattered, background, world, depth - 1)
+                Color { x: 0.0, y: 0.0, z: 0.0 }
             }
-        } else {
-            Color { x: 0.0, y: 0.0, z: 0.0 }
-        }
+        },
     }
 }
 
@@ -293,7 +293,7 @@ fn main() {
     //const ASPECT_RATIO: f64 = 1.0;
     const IMAGE_WIDTH: u32 = 600;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 100;
+    const SAMPLES_PER_PIXEL: u32 = 1000;
     const MAX_DEPTH: u32 = 50;
     const THREAD_COUNT: u32 = 8;
     const TIME_START: f64 = 0.0;

@@ -17,15 +17,13 @@ impl Moving {
 }
 
 impl Hittable for Moving {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let moved_ray = Ray { origin: &ray.origin - &self.offset_at(ray.time), direction: ray.direction.clone(), time: ray.time };
-        if !self.hittable.hit(&moved_ray, t_min, t_max, hit_record) {
-            return false;
-        }
+        let mut hit_record = self.hittable.hit(&moved_ray, t_min, t_max)?;
         hit_record.p += self.offset_at(ray.time).clone();
         let normal = hit_record.normal.clone();
         hit_record.set_face_normal(&moved_ray, &normal);
-        true
+        Some(hit_record)
     }
 
     fn bounding_box(&self, time_start: f64, time_end: f64, output_box: &mut AABB) -> bool {

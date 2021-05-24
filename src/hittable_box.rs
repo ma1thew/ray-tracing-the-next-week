@@ -30,8 +30,8 @@ impl HittableBox {
 }
 
 impl Hittable for HittableBox {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
-        self.sides.hit(ray, t_min, t_max, hit_record)
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        self.sides.hit(ray, t_min, t_max)
     }
 
     fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {

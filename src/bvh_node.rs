@@ -72,13 +72,22 @@ impl BVHNode {
 }
 
 impl Hittable for BVHNode {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         if !self.aabb.hit(ray, t_min, t_max) {
-            return false
+            return None
         }
-        let hit_left = self.left.hit(ray, t_min, t_max, hit_record);
-        let hit_right = self.right.hit(ray, t_min, if hit_left { hit_record.t } else { t_max }, hit_record);
-        hit_left || hit_right
+        let hit_left = self.left.hit(ray, t_min, t_max);
+        let hit_right_threshold = if let Some(hit_record_left) = &hit_left {
+            hit_record_left.t
+        } else {
+            t_max
+        };
+        let hit_right = self.right.hit(ray, t_min, hit_right_threshold);
+        if let Some(_) = &hit_right {
+            hit_right
+        } else {
+            hit_left
+        }
     }
 
     fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {

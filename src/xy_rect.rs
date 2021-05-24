@@ -18,16 +18,17 @@ impl XYRect {
 }
 
 impl Hittable for XYRect {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let t = (self.k - ray.origin.z) / ray.direction.z;
         if t < t_min || t > t_max {
-            return false;
+            return None;
         }
         let x = ray.origin.x + t * ray.direction.x;
         let y = ray.origin.y + t * ray.direction.y;
         if x < self.x0 || x > self.x1 || y < self.y0 || y > self.y1 {
-            return false;
+            return None;
         }
+        let mut hit_record = HitRecord::new();
         hit_record.u = (x - self.x0) / (self.x1 - self.x0);
         hit_record.v = (y - self.y0) / (self.y1 - self.y0);
         hit_record.t = t;
@@ -35,7 +36,7 @@ impl Hittable for XYRect {
         hit_record.set_face_normal(ray, &outward_normal);
         hit_record.material = Some(self.material.clone());
         hit_record.p = ray.at(t);
-        true
+        Some(hit_record)
     }
 
     fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {

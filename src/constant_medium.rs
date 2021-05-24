@@ -20,17 +20,9 @@ impl ConstantMedium {
 
 impl Hittable for ConstantMedium {
     // TODO: this only support convex shapes.
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
-        let mut record_1 = HitRecord::new();
-        let mut record_2 = HitRecord::new();
-
-        if !self.boundary.hit(ray, -f64::INFINITY, f64::INFINITY, &mut record_1) {
-            return false;
-        }
-
-        if !self.boundary.hit(ray, record_1.t + 0.0001, f64::INFINITY, &mut record_2) {
-            return false;
-        }
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut record_1 = self.boundary.hit(ray, -f64::INFINITY, f64::INFINITY)?;
+        let mut record_2 = self.boundary.hit(ray, record_1.t + 0.0001, f64::INFINITY)?;
 
         if record_1.t < t_min {
             record_1.t = t_min;
@@ -40,7 +32,7 @@ impl Hittable for ConstantMedium {
         }
 
         if record_1.t >= record_2.t {
-            return false;
+            return None;
         }
 
         if record_1.t < 0.0 {
@@ -52,16 +44,19 @@ impl Hittable for ConstantMedium {
         let hit_distance = self.neg_inv_density * rand::random::<f64>().ln();
 
         if hit_distance > distance_inside_boundary {
-            return false
+            return None;
         }
 
-        hit_record.t = record_1.t + hit_distance / ray_length;
-        hit_record.p = ray.at(hit_record.t);
-        hit_record.normal = Vec3 { x: 1.0, y: 0.0, z: 0.0 }; // arbitrary
-        hit_record.front_face = true; // arbitrary
-        hit_record.material = Some(self.phase_function.clone());
-
-        true
+        let t = record_1.t + hit_distance / ray_length;
+        Some(HitRecord {
+            p: ray.at(t),
+            t,
+            material: Some(self.phase_function.clone()),
+            normal: Vec3 { x: 1.0, y: 0.0, z: 0.0 }, // arbitrary
+            front_face: true, // arbitrary
+            u: 0.0, // arbitrary
+            v: 0.0, // arbitrary
+        })
     }
 
     fn bounding_box(&self, time_start: f64, time_end: f64, output_box: &mut AABB) -> bool {
