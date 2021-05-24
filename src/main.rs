@@ -293,7 +293,7 @@ fn main() {
     //const ASPECT_RATIO: f64 = 1.0;
     const IMAGE_WIDTH: u32 = 600;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 1000;
+    const SAMPLES_PER_PIXEL: u32 = 200;
     const MAX_DEPTH: u32 = 50;
     const THREAD_COUNT: u32 = 8;
     const TIME_START: f64 = 0.0;
@@ -399,7 +399,7 @@ fn main() {
             update_count += 1;
             final_image.add_sample(update.x, update.y, update.color);
             if update_count % print_frequency == 0 {
-                eprintln!("Current completion: {:.2}%", (update_count as f64 / expected_updates as f64) * 100.0)
+                eprint!("Current completion: {:.2}%\r", (update_count as f64 / expected_updates as f64) * 100.0)
             }
         } else {
             if Arc::strong_count(&world) == 1 {
