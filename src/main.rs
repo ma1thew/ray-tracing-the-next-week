@@ -239,9 +239,10 @@ fn final_scene() -> HittableList {
 
 fn test_scene() -> HittableList {
     let mut objects = HittableList::new();
-    let earth_texture = Arc::new(ImageTexture::from_bmp_data(&include_bytes!("../res/earthmap.bmp").to_vec()));
-    let earth_surface = Arc::new(Lambertian { albedo: earth_texture });
-    objects.add(Arc::new(Moving { hittable: Arc::new(HittableBox::new(Point3 { x: 0.0, y: 0.0, z: 0.0 }, Point3 { x: 1.0, y: 1.0, z: 1.0 }, earth_surface) ), offset_start: Vec3::new(), offset_end: Vec3 { x: 0.0, y: 1.0, z: 0.0 }, time_start: 0.0, time_end: 1.0 }));
+    //let earth_texture = Arc::new(ImageTexture::from_bmp_data(&include_bytes!("../res/earthmap.bmp").to_vec()));
+    //let earth_surface = Arc::new(Lambertian { albedo: earth_texture });
+    let pertext = Arc::new(Lambertian { albedo: Arc::new(NoiseTexture::new(4.0)) });
+    objects.add(Arc::new(XZRect { material: pertext, x0: -f64::INFINITY, x1: f64::INFINITY, z0: -f64::INFINITY, z1: f64::INFINITY, k: 0.0 }));
     objects
 }
 
@@ -290,9 +291,9 @@ fn main() {
     // Image
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     //const ASPECT_RATIO: f64 = 1.0;
-    const IMAGE_WIDTH: u32 = 800;
+    const IMAGE_WIDTH: u32 = 600;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 1000;
+    const SAMPLES_PER_PIXEL: u32 = 100;
     const MAX_DEPTH: u32 = 50;
     const THREAD_COUNT: u32 = 8;
     const TIME_START: f64 = 0.0;
@@ -363,8 +364,9 @@ fn main() {
                 background = Color { x: 0.0, y: 0.0, z: 0.0 };
             },
             Ok(9) => {
-                world = Arc::new(BVHNode::new(&test_scene(), TIME_START, TIME_END));
-                lookfrom = Point3 { x: 13.0, y: 2.0, z: 3.0 };
+                world = Arc::new(test_scene());
+                //world = Arc::new(BVHNode::new(&test_scene(), TIME_START, TIME_END));
+                lookfrom = Point3 { x: 13.0, y: 4.0, z: 3.0 };
                 lookat = Point3 { x: 0.0, y: 0.0, z: 0.0 };
                 vfov = 20.0;
                 aperture = 0.0;

@@ -11,6 +11,12 @@ pub struct XZRect {
     pub k: f64,
 }
 
+impl XZRect {
+    fn has_infinite_bounds(&self) -> bool {
+        self.x0.is_infinite() || self.x1.is_infinite() || self.z0.is_infinite() || self.z1.is_infinite()
+    }
+}
+
 impl Hittable for XZRect {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
         let t = (self.k - ray.origin.y) / ray.direction.y;
@@ -33,7 +39,11 @@ impl Hittable for XZRect {
     }
 
     fn bounding_box(&self, _: f64, _: f64, output_box: &mut AABB) -> bool {
-        *output_box = AABB { minimum: Point3 { x: self.x0, y: self.k - 0.0001, z: self.z0 }, maximum: Point3 { x: self.x1, y: self.k + 0.0001, z: self.z1 } };
-        true
+        if self.has_infinite_bounds() {
+            false
+        } else {
+            *output_box = AABB { minimum: Point3 { x: self.x0, y: self.k - 0.0001, z: self.z0 }, maximum: Point3 { x: self.x1, y: self.k + 0.0001, z: self.z1 } };
+            true
+        }
     }
 }
