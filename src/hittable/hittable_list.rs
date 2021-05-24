@@ -39,21 +39,14 @@ impl Hittable for HittableList {
     }
 
     fn bounding_box(&self, time_start: f64, time_end: f64) -> Option<AABB> {
-        if self.objects.is_empty() {
-            return None;
-        }
-        let mut output_box = AABB::new();
-        let mut first_box = true;
-
+        let mut output_box: Option<AABB> = None;
         for object in &self.objects {
             let temp_box = object.bounding_box(time_start, time_end)?;
-            output_box = if first_box {
-                temp_box.clone()
-            } else {
-                output_box.surrounding_box(&temp_box)
+            output_box = match output_box {
+                Some(aabb) => Some(aabb.surrounding_box(&temp_box)),
+                None => Some(temp_box.clone()),
             };
-            first_box = false;
         }
-        Some(output_box)
+        output_box
     }
 }

@@ -8,14 +8,7 @@ pub struct AABB {
 }
 
 impl AABB {
-    pub fn new() -> AABB {
-        AABB {
-            minimum: Point3::new(),
-            maximum: Point3::new(),
-        }
-    }
     pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> bool {
-        // TODO: This is a bit untidy.
         let mut t_min = t_min;
         let mut t_max = t_max;
         for a in 0..3 {
