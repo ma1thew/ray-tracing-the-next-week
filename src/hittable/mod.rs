@@ -15,6 +15,8 @@ mod yz_rect;
 pub use yz_rect::YZRect;
 mod sphere;
 pub use sphere::Sphere;
+mod triangle;
+pub use triangle::Triangle;
 mod aabb;
 
 use std::sync::Arc;

@@ -13,6 +13,7 @@ use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
 use crate::hittable::XYRect;
 use crate::hittable::XZRect;
 use crate::hittable::YZRect;
+use crate::hittable::Triangle;
 use crate::hittable::instance::Moving;
 
 pub fn get_scene(id: u32) -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color) {
@@ -25,6 +26,7 @@ pub fn get_scene(id: u32) -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color
         7 => cornell_smoke(),
         8 => final_scene(),
         9 => test_scene(),
+        10 => triangle_scene(),
         _ => random_scene(),
     }
 }
@@ -226,4 +228,12 @@ fn test_scene() -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color) {
     objects.add(Arc::new(XZRect { material: pertext, x0: -f64::INFINITY, x1: f64::INFINITY, z0: -f64::INFINITY, z1: f64::INFINITY, k: 0.0 }));
     //(Arc::new(BVHNode::new(&objects, 0.0, 1.0)), Point3 { x: 13.0, y: 2.0, z: 3.0}, Point3::new(), 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
     (Arc::new(objects), Point3 { x: 13.0, y: 2.0, z: 3.0}, Point3::new(), 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
+}
+
+fn triangle_scene() -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color) {
+    let mut objects = HittableList::new();
+    //let pertext = Arc::new(Lambertian { albedo: Arc::new(NoiseTexture::new(4.0)) });
+    let pertext = Arc::new(Lambertian { albedo: Arc::new(SolidColor::from_color(Color {x: 0.0, y: 0.0, z: 0.0}) ) });
+    objects.add(Arc::new(Triangle { material: pertext, v0 : Vec3::new(), v1: Vec3 { x: 0.0, y: 0.0, z: 1.0 }, v2: Vec3 { x: 0.0, y: 1.0, z: 0.5 }  }));    
+    (Arc::new(BVHNode::new(&objects, 0.0, 1.0)), Point3 { x: 5.0, y: 5.0, z: 5.0}, Point3::new(), 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
 }

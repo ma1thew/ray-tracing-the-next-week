@@ -123,6 +123,10 @@ impl Vec3 {
         let r_out_parallel = -((1.0 - r_out_perp.length_squared()).abs().sqrt()) * normal;
         r_out_perp + r_out_parallel
     }
+
+    pub fn has_infinite_member(&self) -> bool {
+        self.x.is_infinite() || self.y.is_infinite() || self.z.is_infinite()
+    }
 }
 
 impl fmt::Display for Vec3 {
