@@ -7,6 +7,7 @@ pub struct Triangle {
     pub v1: Point3,
     pub v2: Point3,
     pub material: Arc<dyn Material>,
+    pub custom_normal: Option<Vec3>,
 }
 
 impl Triangle {
@@ -48,8 +49,13 @@ impl Hittable for Triangle {
         hit_record.v = v;
         hit_record.t = t;
         hit_record.p = ray.at(t);
-        let outward_normal = edge1.cross(&edge2);
-        hit_record.set_face_normal(ray, &outward_normal);
+        // TODO: i don't love this, but it allows for custom surface normals from OBJ data.
+        if let Some(normal) = &self.custom_normal {
+            hit_record.set_face_normal(ray, &normal);
+        } else {
+            let outward_normal = edge1.cross(&edge2).unit_vector();
+            hit_record.set_face_normal(ray, &outward_normal);
+        }
         hit_record.material = Some(self.material.clone());
         Some(hit_record)
     }

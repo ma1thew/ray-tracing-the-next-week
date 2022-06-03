@@ -14,6 +14,7 @@ use crate::hittable::XYRect;
 use crate::hittable::XZRect;
 use crate::hittable::YZRect;
 use crate::hittable::Triangle;
+use crate::hittable::Model;
 use crate::hittable::instance::Moving;
 
 pub fn get_scene(id: u32) -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color) {
@@ -232,8 +233,14 @@ fn test_scene() -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color) {
 
 fn triangle_scene() -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color) {
     let mut objects = HittableList::new();
+    let checker = Arc::new(CheckerTexture::from_colors(Color { x: 0.2, y: 0.3, z: 0.1 } , Color { x: 0.9, y: 0.9, z: 0.9 }));
+    let ground_material = Arc::new(Lambertian { albedo: checker });
+    objects.add(Arc::new(Sphere{ center: Point3 { x: 0.0, y: -1001.0, z: 0.0 }, radius: 1000.0, material: ground_material }));
+
     //let pertext = Arc::new(Lambertian { albedo: Arc::new(NoiseTexture::new(4.0)) });
-    let pertext = Arc::new(Lambertian { albedo: Arc::new(SolidColor::from_color(Color {x: 0.0, y: 0.0, z: 0.0}) ) });
-    objects.add(Arc::new(Triangle { material: pertext, v0 : Vec3::new(), v1: Vec3 { x: 0.0, y: 0.0, z: 1.0 }, v2: Vec3 { x: 0.0, y: 1.0, z: 0.5 }  }));    
-    (Arc::new(BVHNode::new(&objects, 0.0, 1.0)), Point3 { x: 5.0, y: 5.0, z: 5.0}, Point3::new(), 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
+    //let pertext = Arc::new(Lambertian { albedo: Arc::new(SolidColor::from_color(Color {x: 0.0, y: 0.0, z: 0.0}) ) });
+    //objects.add(Arc::new(Triangle { material: Arc::new(Metal { albedo: Color { x: 0.7, y: 0.6, z: 0.5 }, fuzz: 0.0 }), v0 : Vec3::new(), v1: Vec3 { x: 0.0, y: 0.0, z: 1.0 }, v2: Vec3 { x: 0.0, y: 1.0, z: 0.5 }  }));
+    objects.add(Arc::new(Model::from_obj(include_str!("../res/monkey.obj"), Arc::new(Dielectric { index_of_refraction: 1.5 }))));
+    //(Arc::new(objects), Point3 { x: 5.0, y: 5.0, z: 5.0}, Point3::new(), 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
+    (Arc::new(BVHNode::new(&objects, 0.0, 1.0)), Point3 { x: 5.0, y: 5.0, z: 5.0}, Point3 { x: 0.0, y: 0.0, z: 0.0}, 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
 }

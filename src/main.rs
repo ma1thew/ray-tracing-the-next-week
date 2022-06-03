@@ -70,7 +70,7 @@ fn main() {
     //const ASPECT_RATIO: f64 = 1.0;
     const IMAGE_WIDTH: u32 = 600;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
-    const SAMPLES_PER_PIXEL: u32 = 200;
+    const SAMPLES_PER_PIXEL: u32 = 30;
     const MAX_DEPTH: u32 = 50;
     const THREAD_COUNT: u32 = 8;
     const TIME_START: f64 = 0.0;

@@ -17,6 +17,8 @@ mod sphere;
 pub use sphere::Sphere;
 mod triangle;
 pub use triangle::Triangle;
+mod model;
+pub use model::Model;
 mod aabb;
 
 use std::sync::Arc;
