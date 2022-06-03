@@ -53,7 +53,7 @@ impl Hittable for Triangle {
         if let Some(normal) = &self.custom_normal {
             hit_record.set_face_normal(ray, &normal);
         } else {
-            let outward_normal = edge1.cross(&edge2).unit_vector();
+            let outward_normal = edge2.cross(&edge1).unit_vector();
             hit_record.set_face_normal(ray, &outward_normal);
         }
         hit_record.material = Some(self.material.clone());

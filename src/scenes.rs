@@ -5,6 +5,8 @@ use crate::hittable::HittableBox;
 use crate::hittable::HittableList;
 use crate::material::{Dielectric, DiffuseLight, Lambertian, Material, Metal};
 use crate::hittable::instance::RotateY;
+use crate::hittable::instance::RotateX;
+use crate::hittable::instance::RotateZ;
 use crate::hittable::Sphere;
 use crate::hittable::instance::Translate;
 use crate::vec3::{Point3, Vec3, Color};
@@ -240,7 +242,11 @@ fn triangle_scene() -> (Arc<dyn Hittable>, Point3, Point3, f64, f64, Color) {
     //let pertext = Arc::new(Lambertian { albedo: Arc::new(NoiseTexture::new(4.0)) });
     //let pertext = Arc::new(Lambertian { albedo: Arc::new(SolidColor::from_color(Color {x: 0.0, y: 0.0, z: 0.0}) ) });
     //objects.add(Arc::new(Triangle { material: Arc::new(Metal { albedo: Color { x: 0.7, y: 0.6, z: 0.5 }, fuzz: 0.0 }), v0 : Vec3::new(), v1: Vec3 { x: 0.0, y: 0.0, z: 1.0 }, v2: Vec3 { x: 0.0, y: 1.0, z: 0.5 }  }));
-    objects.add(Arc::new(Model::from_obj(include_str!("../res/monkey.obj"), Arc::new(Dielectric { index_of_refraction: 1.5 }))));
+    //let monkey = Arc::new(Model::from_obj(include_str!("../res/monkey.obj"), Arc::new(Dielectric { index_of_refraction: 1.5 })));
+    let monkey = Arc::new(Model::from_obj(include_str!("../res/monkey.obj"), Arc::new(Metal { albedo: Color { x: 0.7, y: 0.6, z: 0.5 }, fuzz: 0.5 })));
+    let monkey = Arc::new(RotateX::new(monkey, 45.0));
+    let monkey = Arc::new(RotateZ::new(monkey, 45.0));
+    objects.add(monkey);
     //(Arc::new(objects), Point3 { x: 5.0, y: 5.0, z: 5.0}, Point3::new(), 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
     (Arc::new(BVHNode::new(&objects, 0.0, 1.0)), Point3 { x: 5.0, y: 5.0, z: 5.0}, Point3 { x: 0.0, y: 0.0, z: 0.0}, 20.0, 0.0, Color { x: 0.7, y: 0.8, z: 1.0 })
 }
